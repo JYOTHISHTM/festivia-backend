@@ -28,19 +28,19 @@ const userId = (req.user as { id: string }).id;
 
 
   async getUserTickets(req: Request, res: Response): Promise<void> {
-    try {
-      const { userId } = req.params;
-      const page = parseInt(req.query.page as string) || 1;
-      const limit = parseInt(req.query.limit as string) || 4;
+  try {
+    const { userId } = req.params;
+    const page = parseInt(req.query.page as string) || 1;
+    const limit = parseInt(req.query.limit as string) || 4;
 
-      const result = await this._userService.getTicketsByUserId(userId, page, limit);
-      res.json(result);
-    } catch (err) {
-      const error = err as Error
-
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
-    }
+    const result = await this._userService.getTicketsByUserId(userId, page, limit);
+    res.json(result);
+  } catch (err) {
+    const error = err as Error;
+    res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message });
   }
+}
+
 
   async cancelUserTicket(req: Request, res: Response): Promise<void> {
     try {

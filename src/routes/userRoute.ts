@@ -14,6 +14,7 @@ const router = Router();
 const {
   authController,
   eventController,
+  ticketController,
   profileController,
   eventProfileController,
   chatController,
@@ -26,6 +27,8 @@ const {
 } = userDependencies();
 
 
+
+router.get("/tickets/:id",ticketController.getTicketById.bind(ticketController));
 
 router.get('/layout/:layoutId', userController.getLayoutAndEvent.bind(userController));
 router.get('/:userId/tickets', userController.getUserTickets.bind(userController));

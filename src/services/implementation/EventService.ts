@@ -16,22 +16,22 @@ class EventService implements IEventService {
     private _ticketRepository: ITicketRepository
   ) { }
 
-  async updateLocation(userId: string, location: string, latitude: number, longitude: number) {
+  async updateLocation(userId: string, location: string, latitude: number, longitude: number):Promise<object|null> {
     return await this._userRepository.updateUserLocation(userId, location, latitude, longitude);
   }
 
 
-  async getUser(userId: string) {
+  async getUser(userId: string):Promise<object|null> {
     return await this._userRepository.getUserById(userId);
   };
 
 
-  async fetchEventsForUserLocation(latitude: number, longitude: number) {
+  async fetchEventsForUserLocation(latitude: number, longitude: number):Promise<object|null> {
     return await this._eventRepository.getEventsByLocation(latitude, longitude);
   }
 
 
-  async bookTicket(userId: string, eventId: string) {
+  async bookTicket(userId: string, eventId: string):Promise<string|null> {
     const event = await this._eventRepository.getEventByIdForTicket(eventId);
     const user = await this._userRepository.findById(userId);
 
@@ -72,7 +72,7 @@ class EventService implements IEventService {
   }
 
 
-  async getEventById(id: string) {
+  async getEventById(id: string):Promise<object|null> {
     const event = await this._eventRepository.getEventById(id);
     return event;
   }
@@ -82,7 +82,7 @@ class EventService implements IEventService {
     return await this._eventRepository.getAllEvents(filters, skip, limit);
   }
 
-  async countEvents(filters: any) {
+  async countEvents(filters: any):Promise<number> {
     return await this._eventRepository.countEvents(filters);
   }
 

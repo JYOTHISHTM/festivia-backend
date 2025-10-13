@@ -6,13 +6,13 @@ class AdminUserService implements IAdminUserService {
   constructor(private _userRepository: IUserRepository) { }
 
 
-  async getUsers(): Promise<any> {
+  async getUsers(): Promise<object> {
     return await this._userRepository.findAll();
   }
 
-  async blockUser(userId: string): Promise<any> {
+async blockUser(userId: string): Promise<object | null> {
     return await this._userRepository.toggleBlock(userId);
-  }
+}
 
 
 }

@@ -4,6 +4,7 @@ import { BaseRepository } from "../implementation/BaseRepository";
 import { ICreatorRepository } from "../interface/ICreatorRepository";
 import SeatLayoutModel from "../../models/SeatLayoutModel";
 import mongoose from "mongoose";
+import { SeatLayoutDocument } from '../../models/SeatLayoutModel';
 
 class CreatorRepository extends BaseRepository<ICreator> implements ICreatorRepository {
   constructor() {
@@ -19,7 +20,7 @@ class CreatorRepository extends BaseRepository<ICreator> implements ICreatorRepo
   }
 
 
-  async findByEmail(email: string): Promise<any> {
+  async findByEmail(email: string): Promise<ICreator | null> {
     return await CreatorModel.findOne({ email });
   }
 
@@ -28,7 +29,7 @@ class CreatorRepository extends BaseRepository<ICreator> implements ICreatorRepo
   }
 
 
-  async findByRefreshToken(refreshToken: string): Promise<any> {
+  async findByRefreshToken(refreshToken: string): Promise<ICreator | null> {
     return await CreatorModel.findOne({ refreshToken });
   }
 
@@ -36,9 +37,10 @@ class CreatorRepository extends BaseRepository<ICreator> implements ICreatorRepo
     await CreatorModel.findByIdAndUpdate(id, { refreshToken: "" });
   }
 
-  async findById(creatorId: string): Promise<any> {
+  async findById(creatorId: string): Promise<ICreator | null> {
     return await CreatorModel.findById(creatorId).select("-password");
   }
+
   async blockCreator(creatorId: string): Promise<ICreator | null> {
     return await this.update(creatorId, { isBlocked: true });
   }
@@ -89,21 +91,21 @@ class CreatorRepository extends BaseRepository<ICreator> implements ICreatorRepo
     return creator;
   }
 
-  
   async findReservedEventsByCreator(layoutId: string) {
     if (!mongoose.Types.ObjectId.isValid(layoutId)) {
       throw new Error('Invalid layoutId');
     }
 
-    const layout = await SeatLayoutModel.findById(layoutId).lean();
+    const layout = await SeatLayoutModel.findById(layoutId).lean() as unknown as SeatLayoutDocument;
     if (!layout) throw new Error('Seat layout not found');
 
-    const event = await EventModel.findOne({ layoutId: layout._id }).select('eventName image').lean();
+    const event = await EventModel.findOne({ layoutId: layout._id }).select('eventName image').lean() as unknown as Pick<IEvent, 'eventName' | 'image'>;
     if (!event) throw new Error('Event not found for this layout');
 
     return { layout, event };
   }
 
+
 }
 
-export default  CreatorRepository
+export default CreatorRepository

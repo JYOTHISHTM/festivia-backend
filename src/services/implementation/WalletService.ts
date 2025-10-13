@@ -99,7 +99,7 @@ class WalletService implements IWalletService {
     }
     return wallet;
   }
-  async createStripeSession(userId: string, amount: number) {
+  async createStripeSession(userId: string, amount: number): Promise<object> {
     if (!userId || !amount) {
       throw new Error(WalletMessages.USER_ID_AND_AMOUNT_REQUIRED);
     }

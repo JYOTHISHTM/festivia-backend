@@ -1,35 +1,47 @@
-import mongoose from 'mongoose';
-const walletSchema = new mongoose.Schema({
+import mongoose, { Document, Schema, Types } from "mongoose";
+
+export interface IWallet extends Document {
+  user?: Types.ObjectId;
+  creator?: Types.ObjectId;
+  balance: number;
+  transactions: {
+    type: "add" | "refund" | "deduct";
+    amount: number;
+    date: Date;
+  }[];
+}
+
+const walletSchema = new Schema<IWallet>({
   user: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'User',
+    type: Schema.Types.ObjectId,
+    ref: "User",
     unique: true,
-    sparse: true 
+    sparse: true,
   },
   creator: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'Creator',
+    type: Schema.Types.ObjectId,
+    ref: "Creator",
     unique: true,
-    sparse: true
+    sparse: true,
   },
   balance: {
     type: Number,
-    default: 0  
+    default: 0,
   },
   transactions: [
     {
       type: {
         type: String,
-        enum: ['add', 'refund','deduct']
+        enum: ["add", "refund", "deduct"],
       },
       amount: Number,
       date: {
         type: Date,
-        default: Date.now
-      }
-    }
-  ]
+        default: Date.now,
+      },
+    },
+  ],
 });
 
-
-export const Wallet = mongoose.model('Wallet', walletSchema);
+export const Wallet = mongoose.model<IWallet>("Wallet", walletSchema);
+export type WalletDocument = IWallet; // alias for clarity

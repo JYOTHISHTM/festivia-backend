@@ -6,9 +6,9 @@ export interface IAdminRepository {
   findByRefreshToken(refreshToken: string): Promise<IAdmin | null>;
   updateRefreshToken(adminId: string, refreshToken: string): Promise<void>;
   clearRefreshToken(adminId: string): Promise<void>;
-  updateCreatorStatusToPending(creatorId: string): Promise<any>;
+  updateCreatorStatusToPending(creatorId: string): Promise<Response>;
   getFixedSubscriptionPlan(): Promise<ISubscription[]>;
-  create(data: any): Promise<any>
-  deleteSubscription(id: string): Promise<any>
-  searchCreators(search:string):Promise<any>
+  create<T extends object>(data: T): Promise<object>;
+  deleteSubscription(id: string): Promise<object>
+  searchCreators(search:string):Promise<object>
 }

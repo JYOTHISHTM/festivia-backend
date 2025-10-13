@@ -1,16 +1,11 @@
 import { SaveMessageDTO } from "../../dto/SaveMessageDTO";
 
 export interface IChatService {
-  saveMessage(data:SaveMessageDTO): Promise<any>; 
-
-  getChatHistory(roomId: string): Promise<any[]>;
-
-  getChatHistoryForCreator(roomId: string): Promise<any[]>;
-
-  getChatsForUser(userId: string): Promise<any[]>;
-
-  getChatsForCreator(creatorId: string): Promise<any[]>;
-
-  getUsersWhoMessagedCreator(creatorId: string): Promise<any[]>;
-
+  saveMessage(data: SaveMessageDTO): Promise<object>;
+  getChatHistory(roomId: string): Promise<object[]>;
+  getChatHistoryForCreator(roomId: string): Promise<object[]>;
+  getChatsForUser(userId: string): Promise<object[]>;
+  getChatsForCreator(creatorId: string): Promise<object[]>;
+  getUsersWhoMessagedCreator(creatorId: string): Promise<object[]>;
 }
+

@@ -1,13 +1,12 @@
 
 export interface IWalletRepository {
 
-  deductAmount(userId: string, totalAmount: number): Promise<any>;
-  // getUserById(userId: string): Promise<any>;
-  getWalletByCreatorId(creatorId: string): Promise<any>;
-  createWalletForCreator(creatorId: string): Promise<any>;
-  updateWalletToCreator(creatorId: string, amount: number, type: 'add' | 'refund'): Promise<any>;
-  createWallet(userId: string): Promise<any>;
-  getWalletByUserId(userId: string): Promise<any>;
-  getWalletForBooking(userId: string): Promise<any>;
-  updateWallet(userId: string, amount: number, type: 'add' | 'refund' | 'deduct'): Promise<any>;
+  deductAmount(userId: string, totalAmount: number): Promise<object>
+  getWalletByCreatorId(creatorId: string): Promise<object>
+  createWalletForCreator(creatorId: string): Promise<object>
+  updateWalletToCreator(creatorId: string, amount: number, type: 'add' | 'refund'): Promise<object>
+  createWallet(userId: string): Promise<object>
+  getWalletByUserId(userId: string): Promise<object>
+  getWalletForBooking(userId: string): Promise<object>
+  updateWallet(userId: string, amount: number, type: 'add' | 'refund' | 'deduct'): Promise<object>
 }

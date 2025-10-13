@@ -1,5 +1,13 @@
 import { ICreatorSubscription } from "../../models/CreatorSubscription";
 
+export interface ICreateSubscriptionData {
+  creatorId: string;
+  planId: string;
+  startDate: Date;
+  endDate: Date;
+  [key: string]: unknown; // optional extra fields
+}
+
 export interface ISubscriptionRepository {
   buySubscriptionUsingWallet(
     creatorId: string,
@@ -28,7 +36,7 @@ export interface ISubscriptionRepository {
     limit?: number
   ): Promise<{ subscriptions: ICreatorSubscription[]; totalCount: number }>;
 
-  createSubscription(data: any): Promise<ICreatorSubscription>;
+  createSubscription(data: ICreateSubscriptionData): Promise<ICreatorSubscription>;
 
   setSubscriptionExpired(
     creatorId: string

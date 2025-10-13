@@ -1,15 +1,22 @@
 import mongoose, { Document, Schema, Types } from "mongoose";
+import { IEvent } from "./Event";
+import { IUser } from "./User";
 
-export interface ITicket extends Document {
-  userId: Types.ObjectId;
-  eventId: Types.ObjectId;
+export interface ITicket {
+  userId: Types.ObjectId | IUser;
+  eventId: Types.ObjectId | IEvent;
   price: number;
   seats: number[];
   paymentStatus: "success" | "pending" | "cancelled";
   createdAt: Date;
+  qrCode?: string;
 }
 
-const ticketSchema = new Schema<ITicket>({
+export interface TicketDocument extends ITicket, Document {
+  _id: Types.ObjectId;
+}
+
+const ticketSchema = new Schema<TicketDocument>({
   userId: { type: Schema.Types.ObjectId, ref: "User", required: true },
   eventId: { type: Schema.Types.ObjectId, ref: "Event", required: true },
   price: { type: Number, required: true },
@@ -20,6 +27,7 @@ const ticketSchema = new Schema<ITicket>({
     default: "pending",
   },
   createdAt: { type: Date, default: Date.now },
+  qrCode: { type: String },
 });
 
-export const Ticket = mongoose.model<ITicket>("Ticket", ticketSchema);
+export const Ticket = mongoose.model<TicketDocument>("Ticket", ticketSchema);

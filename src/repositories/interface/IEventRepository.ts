@@ -17,12 +17,12 @@ export interface IEventRepository {
   getEventById(id: string): Promise<IEvent | null>;
 
   getAllEvents(
-    filters: Record<string, any>,
+    filters: Record<string,null>,
     skip: number,
     limit: number
   ): Promise<IEvent[]>;
 
-  countEvents(filters: Record<string, any>): Promise<number>;
+  countEvents(filters: Record<string,null>): Promise<number>;
 
   updateDescription(eventId: string, description: string): Promise<IEvent | null>;
 

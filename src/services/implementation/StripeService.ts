@@ -8,7 +8,7 @@ export class StripeService implements IStripeService {
     amount: number,
     successUrl: string,
     cancelUrl: string,
-    metadata: Record<string, any> = {},
+    metadata: Record<string,null> = {},
     productName: string = 'Wallet Top-up'
   ): Promise<string> {
     const customer = await stripe.customers.create({ metadata });

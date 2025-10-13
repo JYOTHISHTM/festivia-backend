@@ -99,13 +99,14 @@ class OtpService implements IOtpService {
     
     return result;
     
-  } catch (error:any) {
+  } catch (error) {
+    const err=error as Error
     console.error("=== ERROR in OTP SERVICE ===");
-    console.error("Error type:", error.constructor.name);
-    console.error("Error message:", error.message);
-    console.error("Error stack:", error.stack);
+    console.error("Error type:", err.constructor.name);
+    console.error("Error message:", err.message);
+    console.error("Error stack:", err.stack);
     console.log("=== OTP SERVICE verifyOTP ERROR END ===");
-    throw error; // Re-throw to maintain error flow
+    throw error; 
   }
 }
 

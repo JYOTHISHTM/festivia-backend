@@ -21,7 +21,7 @@ import WalletService from "../services/implementation/WalletService";
 import PasswordService from "../services/implementation/PasswordService";
 import OtpService from "../services/implementation/OtpService";
 import UserService from "../services/implementation/UserService";
-
+import TicketService from "../services/implementation/TicketService";
 import AuthController from "../controllers/implementation/AuthController";
 import EventController from "../controllers/implementation/EventController";
 import ProfileController from "../controllers/implementation/ProfileController";
@@ -34,6 +34,7 @@ import UserController from "../controllers/implementation/UserController";
 import { OtpRepository } from "../repositories/implementation/OtpRepository";
 import { PasswordHasher } from "../utils/passwordHasher";
 import { TokenService } from "../utils/tokenService";
+import TicketController from "../controllers/implementation/TicketController";
 
 export const userDependencies = () => {
   const authRepository = new AuthRepository();
@@ -59,6 +60,7 @@ export const userDependencies = () => {
   const passwordService = new PasswordService(passwordRepository);
   const otpService = new OtpService(userRepository, creatorRepository, authRepository,otpRepository);
   const userService = new UserService(userRepository);
+  const ticketService = new TicketService(ticketRepository)
 
   const authController = new AuthController(authService);
   const eventController = new EventController(eventService);
@@ -69,6 +71,7 @@ export const userDependencies = () => {
   const passwordController = new PasswordController(passwordService);
   const otpController = new OtpController(otpService);
   const userController = new UserController(userService);
+  const ticketController = new TicketController(ticketService)
 
   const storage = multer.memoryStorage();
   const upload = multer({ storage });
@@ -76,6 +79,7 @@ export const userDependencies = () => {
   return {
     authController,
     eventController,
+    ticketController,
     profileController,
     eventProfileController,
     chatController,

@@ -13,7 +13,7 @@ class CreatorService implements ICreatorService {
     return this._creatorRepository.findReservedEventsByCreator(layoutId);
   }
 
-  async getCreator(creatorId: string): Promise<any> {
+  async getCreator(creatorId: string):Promise<object|null>{
     return this._creatorRepository.findById(creatorId);
   }
 

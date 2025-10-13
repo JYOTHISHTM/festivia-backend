@@ -3,17 +3,17 @@ import { ICreatorSubscription } from "../../models/CreatorSubscription";
 export interface ISubscriptionService {
   createCheckoutSession(creatorId: string, name: string): Promise<string>;
 
-  buyUsingWallet(creatorId: string, planName: string): Promise<any>;
+  buyUsingWallet(creatorId: string, planName: string):Promise<object>;
 
-  fetchCreatorSubscription(creatorId: string): Promise<any>;
+  fetchCreatorSubscription(creatorId: string):Promise<object>;
 
   getAllSubscriptionPlan(): Promise<ICreatorSubscription[] | null>;
 
-  getCreatorHistory(creatorId: string, page?: number, limit?: number): Promise<any>;
+  getCreatorHistory(creatorId: string, page?: number, limit?: number):Promise<object>;
 
-  getSubscriptionHistory(page?: number, limit?: number): Promise<any>;
+  getSubscriptionHistory(page?: number, limit?: number):Promise<object>;
 
-  saveSubscription(data: any): Promise<any>;
+  saveSubscription(data: any):Promise<object>;
 
-  expireSubscription(creatorId: string): Promise<any>;
+  expireSubscription(creatorId: string):Promise<object>;
 }

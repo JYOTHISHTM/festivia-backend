@@ -8,6 +8,6 @@ export interface IAdminService {
 
   refreshToken(refreshToken: string): Promise<string | null>;
   logout(refreshToken: string): Promise<void>;
-  getDashboardData(): Promise<any>;
+  getDashboardData(): Promise<object>
 
 }

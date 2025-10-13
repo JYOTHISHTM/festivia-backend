@@ -1,10 +1,22 @@
 import mongoose from "mongoose";
 import SeatLayoutModel from '../../models/SeatLayoutModel';
 import { ITicketRepository } from "../interface/ITicketRepository";
-import { ITicket, Ticket } from "../../models/Ticket";
+import { ITicket, Ticket,TicketDocument } from "../../models/Ticket";
 import Event from '../../models/Event';
 
 class TicketRepository implements ITicketRepository {
+
+
+  
+
+  async findById(id: string): Promise<TicketDocument | null> {
+    return Ticket.findById(id)
+      .populate("eventId")
+      .populate("userId")
+      .exec();
+  }
+
+
   async getTicketSummaryByCreator(
     creatorId: string,
     selectedEventId?: string,
@@ -42,12 +54,22 @@ class TicketRepository implements ITicketRepository {
         $group: {
           _id: "$event._id",
           eventName: { $first: "$event.eventName" },
+          ttttttttt: { $first: "$event.event" },
           eventImage: { $first: "$event.image" },
           ticketsSold: { $sum: 1 },
+          daySelectionMode: { $first: "$event.daySelectionMode" },
+          Date: { $first: "$event.date" },
+          startDate: { $first: "$event.startDate" },
+          endDate: { $first: "$event.endDate" },
+          time: { $first: "$event.time" },
+          location: { $first: "$event.location" },
+          eventType: { $first: "$event.eventType" },
+          seatType:{$first:"$event.seatType"},
           totalRevenue: { $sum: "$price" },
           allBuyers: {
             $push: {
               name: "$user.name",
+              seats: "$seats",
               email: "$user.email",
               price: "$price",
               createdAt: "$createdAt"
@@ -103,11 +125,11 @@ class TicketRepository implements ITicketRepository {
       { $set: { "seats.$.isBooked": true } }
     );
   }
-   async createTicket(ticketData: Partial<ITicket>): Promise<ITicket> {
+  async createTicket(ticketData: Partial<ITicket>): Promise<ITicket> {
     return await Ticket.create(ticketData);
   }
 
-    async getUsersWhoBoughtTicketsByCreator(
+  async getUsersWhoBoughtTicketsByCreator(
     creatorId: string,
     skip: number,
     limit: number
@@ -129,4 +151,4 @@ class TicketRepository implements ITicketRepository {
   }
 }
 
-export default  TicketRepository
+export default TicketRepository

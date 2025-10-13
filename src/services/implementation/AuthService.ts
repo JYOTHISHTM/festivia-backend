@@ -13,6 +13,13 @@ import { generateOTP } from "../../utils/otpGenerator";
 import { AuthStatus } from "../../enums/AuthStatus";
 import { OTP_EMAIL_TEMPLATE } from "../../utils/otpEmailTemplate";
 
+interface GoogleProfile {
+  id: string;
+  displayName: string;
+  emails: { value: string }[];
+}
+
+
 class AuthService implements IAuthService {
   constructor(
     private readonly _userRepository: IUserRepository,
@@ -70,9 +77,7 @@ class AuthService implements IAuthService {
 
 
     await this._otpRepository.createOtp(email, otp, expiresAt);
-    // await sendMail(email, "Your OTP Code 5555", `Your OTP is 666: ${otp}`);
-    // await sendMail(email, "FESTIVIA - Your OTP Code", OTP_EMAIL_TEMPLATE(otp));
-
+    
 
     const data: any = { name, email, password: hashedPassword, isVerified: false };
     if (role === Roles.CREATOR) data.isAdminApproved = false;
@@ -111,7 +116,7 @@ class AuthService implements IAuthService {
     return this._tokenService.generateAccessToken({ id: user._id });
   }
 
-  async findOrCreate(profile: any): Promise<IUser | null> {
+  async findOrCreate(profile: GoogleProfile): Promise<IUser | null> {
     let user = await this._authRepository.findByGoogleId(profile.id);
     if (!user) {
       user = await this._authRepository.createUser({

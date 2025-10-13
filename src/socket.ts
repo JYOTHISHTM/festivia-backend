@@ -1,9 +1,12 @@
 import { Server as SocketIOServer } from "socket.io";
-import  ChatService  from "./services/implementation/ChatService";
-import  ChatRepository  from "./repositories/implementation/ChatRepository";
+import ChatService from "./services/implementation/ChatService";
+import ChatRepository from "./repositories/implementation/ChatRepository";
+import UserRepository from "./repositories/implementation/UserRepository";
 
-const chatService = new ChatService(new ChatRepository());
-
+const chatService = new ChatService(
+  new ChatRepository(),
+  new UserRepository()
+);
 export const setupSocket = (io: SocketIOServer) => {
   io.on("connection", (socket) => {
     console.log("Socket connected:", socket.id);
@@ -39,7 +42,7 @@ export const setupSocket = (io: SocketIOServer) => {
     });
 
 
-    
+
     socket.on("send-message", async (data) => {
       const {
         roomId,
@@ -51,7 +54,7 @@ export const setupSocket = (io: SocketIOServer) => {
         mediaUrl,
         mediaName,
         mediaSize,
-        replyTo, 
+        replyTo,
       } = data;
 
       try {
@@ -81,18 +84,19 @@ export const setupSocket = (io: SocketIOServer) => {
           replyTo
         });
 
-        const savedMessage = await chatService.saveMessage(
+        const savedMessage = await chatService.saveMessage({
           roomId,
           sender,
-          message || "", 
+          message: message || "",
           userId,
           creatorId,
           mediaType,
           mediaUrl,
           mediaName,
           mediaSize,
-          replyTo 
-        );
+          replyTo
+        });
+
 
         io.to(roomId).emit("receive-message", {
           _id: savedMessage._id,
@@ -103,18 +107,18 @@ export const setupSocket = (io: SocketIOServer) => {
           mediaUrl,
           mediaName,
           mediaSize,
-          replyTo, 
+          replyTo,
         });
-        
+
         console.log(`Message sent to room ${roomId}`, {
           hasText: !!message,
           hasMedia: !!mediaUrl,
           isReply: !!replyTo
         });
-        
+
       } catch (error) {
         console.error("Error sending message:", error);
-        socket.emit("error", { 
+        socket.emit("error", {
           message: "Failed to send message",
           details: error instanceof Error ? error.message : "Unknown error"
         });

@@ -1,7 +1,12 @@
 import { IUser } from "../../models/User";
+interface GoogleProfile {
+  id: string;
+  displayName: string;
+  emails: { value: string }[];
+}
 
 export interface IAuthService {
-  login(email: string, password: string,role: "user" | "creator"): Promise<any>;
+  login(email: string, password: string,role: "user" | "creator"):Promise<object>
 
   register(
     name: string,
@@ -23,5 +28,5 @@ export interface IAuthService {
   ): Promise<string | null>;
 
  
-  findOrCreate(profile: any): Promise<IUser | null>;
+  findOrCreate(profile: GoogleProfile): Promise<IUser | null>;
 }

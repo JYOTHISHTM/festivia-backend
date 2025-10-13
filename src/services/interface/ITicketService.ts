@@ -1,7 +1,10 @@
+import { TicketDetails } from "../../dto/TicketDetails";
 
 export interface ITicketService {
-  getTicketSummary( creatorId: string, selectedEventId?: string, page?: number, limit?: number): Promise<any>; 
-getUsersWhoBoughtTickets(
+  getTicketSummary( creatorId: string, selectedEventId?: string, page?: number, limit?: number):Promise<object> 
+
+
+  getUsersWhoBoughtTickets(
   creatorId: string,
   page: number,
   limit: number
@@ -16,5 +19,7 @@ getUsersWhoBoughtTickets(
   totalPages: number;
   currentPage: number;
 }>;
+ getTicketById(id: string): Promise<TicketDetails | null>;
+
 
 }

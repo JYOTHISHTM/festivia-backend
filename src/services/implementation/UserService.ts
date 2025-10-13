@@ -3,6 +3,8 @@ import dotenv from "dotenv";
 import { IUserService } from "../interface/IUserService";
 import { IUserRepository } from "../../repositories/interface/IUserRepository";
 import { TicketMessages } from "../../enums/StatusCodes";
+import QRCode from "qrcode";
+import config from "../../config/config";
 
 dotenv.config();
 
@@ -13,11 +15,20 @@ class UserService implements IUserService {
   }
 
   async getUserById(userId: string) {
-    return this._userRepository.findUserById(userId); 
+    return this._userRepository.findUserById(userId);
   }
+
   async getTicketsByUserId(userId: string, page: number, limit: number) {
-    return await this._userRepository.findTicketsByUserId(userId, page, limit);
+    const result = await this._userRepository.findTicketsByUserId(userId, page, limit);
+
+    for (const ticket of result.tickets) {
+      const qrData = `${config.frontendUrl}/user/tickets/${ticket._id}`;
+      ticket.qrCode = await QRCode.toDataURL(qrData);
+    }
+
+    return result;
   }
+
 
 
   async cancelTicketAndRefund(ticketId: string, userId: string) {

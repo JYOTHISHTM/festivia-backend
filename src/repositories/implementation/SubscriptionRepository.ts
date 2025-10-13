@@ -5,45 +5,55 @@ import Subscription from "../../models/Subscription";
 import { Wallet } from '../../models/Wallet';
 import { ISubscriptionRepository } from "../interface/ISubscriptionRepository";
 
- class SubscriptionRepository implements ISubscriptionRepository {
 
-
-async buySubscriptionUsingWallet(creatorId: string, planName: string) {
-  const plan = await Subscription.findOne({ name: planName });
-  if (!plan) throw new Error('Invalid subscription plan');
-
-  const wallet = await Wallet.findOne({ creator: creatorId });
-  if (!wallet || wallet.balance < plan.price) {
-    throw new Error('Insufficient wallet balance');
-  }
-
-  await CreatorSubscription.updateMany(
-    { creatorId, status: 'active' },
-    { $set: { status: 'expired' } }
-  );
-
-  wallet.balance -= plan.price;
-  wallet.transactions.push({ type: 'deduct', amount: plan.price });
-  await wallet.save();
-
-  const startDate = new Date();
-  const endDate = new Date(startDate);
-  endDate.setDate(endDate.getDate() + plan.days);
-
-  const subscription = await CreatorSubscription.create({
-    creatorId,
-    name: plan.name,
-    price: plan.price,
-    days: plan.days,
-    startDate,
-    endDate,
-    subscribedAt: startDate,
-    paymentMethod: 'wallet',
-    status: 'active'
-  });
-
-  return subscription;
+interface SubscriptionData {
+  creatorId: string;
+  planName: string;
+  startDate: Date;
+  endDate: Date;
+  status: string;
 }
+
+
+class SubscriptionRepository implements ISubscriptionRepository {
+
+
+  async buySubscriptionUsingWallet(creatorId: string, planName: string) {
+    const plan = await Subscription.findOne({ name: planName });
+    if (!plan) throw new Error('Invalid subscription plan');
+
+    const wallet = await Wallet.findOne({ creator: creatorId });
+    if (!wallet || wallet.balance < plan.price) {
+      throw new Error('Insufficient wallet balance');
+    }
+
+    await CreatorSubscription.updateMany(
+      { creatorId, status: 'active' },
+      { $set: { status: 'expired' } }
+    );
+
+    wallet.balance -= plan.price;
+    wallet.transactions.push({ type: 'deduct', amount: plan.price });
+    await wallet.save();
+
+    const startDate = new Date();
+    const endDate = new Date(startDate);
+    endDate.setDate(endDate.getDate() + plan.days);
+
+    const subscription = await CreatorSubscription.create({
+      creatorId,
+      name: plan.name,
+      price: plan.price,
+      days: plan.days,
+      startDate,
+      endDate,
+      subscribedAt: startDate,
+      paymentMethod: 'wallet',
+      status: 'active'
+    });
+
+    return subscription;
+  }
 
   async saveCustomerSubscription(customerId: string, subscriptionId: string) {
     return { customerId, subscriptionId };
@@ -52,7 +62,7 @@ async buySubscriptionUsingWallet(creatorId: string, planName: string) {
   async getSubscriptionByCreatorId(creatorId: string) {
     return await CreatorSubscription.findOne({
       creatorId: new mongoose.Types.ObjectId(creatorId),
-      status: 'active', 
+      status: 'active',
     });
   }
 
@@ -62,51 +72,51 @@ async buySubscriptionUsingWallet(creatorId: string, planName: string) {
 
 
 
-async getSubscriptionsByCreatorId(creatorId: string, page: number = 1, limit: number = 5) {
-  const skip = (page - 1) * limit;
-  const subscriptions = await CreatorSubscription.find({ creatorId })
-    .sort({ subscribedAt: -1 })
-    .skip(skip)
-    .limit(limit);
-
-  const total = await CreatorSubscription.countDocuments({ creatorId });
-
-  return { subscriptions, total };
-}
-
-
-
-
-async getSubscriptionsForAdmin(page: number = 1, limit: number = 10) {
-  const skip = (page - 1) * limit;
-
-  const [subscriptions, totalCount] = await Promise.all([
-    CreatorSubscription.find()
-      .populate('creatorId', 'name email')
+  async getSubscriptionsByCreatorId(creatorId: string, page: number = 1, limit: number = 5) {
+    const skip = (page - 1) * limit;
+    const subscriptions = await CreatorSubscription.find({ creatorId })
       .sort({ subscribedAt: -1 })
       .skip(skip)
-      .limit(limit),
-    CreatorSubscription.countDocuments()
-  ]);
+      .limit(limit);
 
-  return { subscriptions, totalCount };
-}
+    const total = await CreatorSubscription.countDocuments({ creatorId });
 
-  async createSubscription(data: any) {
+    return { subscriptions, total };
+  }
+
+
+
+
+  async getSubscriptionsForAdmin(page: number = 1, limit: number = 10) {
+    const skip = (page - 1) * limit;
+
+    const [subscriptions, totalCount] = await Promise.all([
+      CreatorSubscription.find()
+        .populate('creatorId', 'name email')
+        .sort({ subscribedAt: -1 })
+        .skip(skip)
+        .limit(limit),
+      CreatorSubscription.countDocuments()
+    ]);
+
+    return { subscriptions, totalCount };
+  }
+
+  async createSubscription(data: SubscriptionData) {
     return await CreatorSubscription.create(data);
   }
 
 
- async setSubscriptionExpired(creatorId: string) {
+  async setSubscriptionExpired(creatorId: string) {
 
-  const filter = { creatorId: new mongoose.Types.ObjectId(creatorId), status: 'active' };
-  const update = { status: 'expired' };
+    const filter = { creatorId: new mongoose.Types.ObjectId(creatorId), status: 'active' };
+    const update = { status: 'expired' };
 
-  const result = await CreatorSubscription.findOneAndUpdate(filter, update, { new: true });
+    const result = await CreatorSubscription.findOneAndUpdate(filter, update, { new: true });
 
 
-  return result;
-}
+    return result;
+  }
 
 }
 

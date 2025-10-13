@@ -4,6 +4,7 @@ import { StatusCodes } from "../../enums/StatusCodes";
 import { AuthMessages } from "../../enums/StatusCodes";
 import { IOtpService } from "../../services/interface/IOtpService";
 import { Roles } from "../../enums/Roles";
+import { AxiosError } from "axios";
 
 class OtpController implements IOtpController {
   constructor(private _otpService: IOtpService) { }
@@ -91,7 +92,8 @@ async verifyOTP(req: Request, res: Response): Promise<void> {
       message: result.message, 
       data: result 
     });
-  } catch (error:any) {
+  } catch (err) {
+      const error = err as AxiosError<{ message: string }>;
 
     console.error("Error message:", error.message);
     

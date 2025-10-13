@@ -9,7 +9,24 @@ class TicketController implements ITicketController {
 
   constructor(private readonly _ticketService: ITicketService) { }
 
+ async getTicketById(req: Request, res: Response): Promise<void> {
+    try {
+      const { id } = req.params;
+      const ticket = await this._ticketService.getTicketById(id);
 
+      if (!ticket) {
+        res.status(404).json({ message: "Ticket not found" });
+        return;
+      }
+
+      res.json(ticket);
+    } catch (error) {
+      console.error(error);
+      res.status(500).json({ message: "Server error" });
+    }
+  }
+
+  
   async getUsersWhoBoughtTickets(req: Request, res: Response): Promise<void> {
     try {
       const { creatorId, page = '1', limit = '7' } = req.query;

@@ -1,8 +1,8 @@
 import mongoose, { Document } from "mongoose";
 
 export interface IUserInput {
-  name?: string;
-  email?: string;
+  name: string;
+  email: string;
   age?: number;
   gender?: string;
   address?: string;

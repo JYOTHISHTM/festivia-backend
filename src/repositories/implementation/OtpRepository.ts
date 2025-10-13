@@ -14,11 +14,8 @@ export class OtpRepository implements IOtpRepository {
     await OTP.deleteOne({ email });
   }
 
-  //  async findOne(email: string, otp: string): Promise<any | null> {
-  //   return OTP.findOne({ email, otp });
-  // }
 
-  async findOne(email: string, otp: string): Promise<any | null> {
+  async findOne(email: string, otp: string) {
   try {
     console.log("=== OTP REPOSITORY findOne START ===");
     console.log("OTP query input:", { email, otp, otpLength: otp?.length });

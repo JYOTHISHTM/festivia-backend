@@ -8,9 +8,10 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     this.model = model;
   }
 
-   async findAll(): Promise<T[]> {
+  async findAll(): Promise<T[]> {
     return await this.model.find();
   }
+
   async create(data: Partial<T>): Promise<T> {
     return await this.model.create(data);
   }
@@ -22,8 +23,6 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
   async findOne(query: object): Promise<T | null> {
     return await this.model.findOne(query);
   }
-
- 
 
   async update(id: string, data: Partial<T>): Promise<T | null> {
     return await this.model.findByIdAndUpdate(id, data, { new: true });
@@ -37,7 +36,9 @@ export class BaseRepository<T extends Document> implements IBaseRepository<T> {
     const entity = await this.model.findById(id);
     if (!entity) return null;
 
-    (entity as any).isBlocked = !(entity as any).isBlocked;
-    return await entity.save();
+    const blockable = entity as unknown as T & { isBlocked: boolean };
+
+    blockable.isBlocked = !blockable.isBlocked;
+    return await (blockable as T).save();
   }
 }

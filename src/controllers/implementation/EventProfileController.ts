@@ -127,25 +127,50 @@ class EventProfileController implements IEventProfileController {
 
   async getProfileInfo(req: Request, res: Response): Promise<void> {
     try {
-      const creatorId = req.query.creatorId as string;
+      console.log("👉 Incoming /event-profile-info request:", req.query);
 
+      const creatorId = req.query.creatorId as string;
       if (!creatorId) {
-        res.status(StatusCodes.BAD_REQUEST).json({ error: PostEventMessages.CREATOR_ID_REQUIRED });
+        res.status(StatusCodes.BAD_REQUEST).json({ error: "creatorId is required" });
         return;
       }
 
       const profile = await this._eventProfileService.getProfileData(creatorId);
+      console.log("👉 Profile found:", profile);
 
       if (!profile) {
-        res.status(StatusCodes.NOT_FOUND).json({ error: PostEventMessages.PROFILE_NOT_FOUND });
+        res.status(StatusCodes.NOT_FOUND).json({ error: "Profile not found" });
         return;
       }
 
       res.json(profile);
     } catch (error) {
-      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: PostEventMessages.FAILED_TO_UPDATE_PROFILE_INFO });
+      console.error("❌ getProfileInfo error:", error);
+      res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: "Internal server error" });
     }
   }
+
+  // async getProfileInfo(req: Request, res: Response): Promise<void> {
+  //   try {
+  //     const creatorId = req.query.creatorId as string;
+
+  //     if (!creatorId) {
+  //       res.status(StatusCodes.BAD_REQUEST).json({ error: PostEventMessages.CREATOR_ID_REQUIRED });
+  //       return;
+  //     }
+
+  //     const profile = await this._eventProfileService.getProfileData(creatorId);
+
+  //     if (!profile) {
+  //       res.status(StatusCodes.NOT_FOUND).json({ error: PostEventMessages.PROFILE_NOT_FOUND });
+  //       return;
+  //     }
+
+  //     res.json(profile);
+  //   } catch (error) {
+  //     res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: PostEventMessages.FAILED_TO_UPDATE_PROFILE_INFO });
+  //   }
+  // }
 }
 
 export default EventProfileController;
