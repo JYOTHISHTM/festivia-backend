@@ -23,6 +23,11 @@ class EventProfileController implements IEventProfileController {
         return res.status(StatusCodes.BAD_REQUEST).json({ error: PostEventMessages.MAIN_IMAGE_REQUIRED });
       }
 
+      // Guard: creator ID must be present
+      if (!req.body.creator) {
+        return res.status(StatusCodes.BAD_REQUEST).json({ error: "Creator ID is required" });
+      }
+
       const additionalImages = (files["additionalImages"] || []).map(file => file.path);
 
       const totalTicketsSold = parseInt(req.body.totalTicketsSold) || 0;
@@ -37,12 +42,11 @@ class EventProfileController implements IEventProfileController {
         additionalImages,
       };
 
-
       const created = await this._eventProfileService.postEvent(eventData);
-
 
       return res.status(StatusCodes.CREATED).json(created);
     } catch (err) {
+      console.error("❌ PostEvent error:", err);
       return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: PostEventMessages.EVENT_CREATION_FAILED });
     }
   }
@@ -82,7 +86,7 @@ class EventProfileController implements IEventProfileController {
   async getAllPrivateCreatorsProfile(_req: Request, res: Response): Promise<void> {
     try {
       const profile = await this._eventProfileService.getAllPrivateCreatorsData();
-      const safeProfiles = profile.map(eventProfileDTO);
+      const safeProfiles = (profile as any[]).map(eventProfileDTO);
       res.json(safeProfiles);
     } catch (error) {
       res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: PostEventMessages.ERROR_GETTING_PROFILE_INFO });
@@ -127,22 +131,16 @@ class EventProfileController implements IEventProfileController {
 
   async getProfileInfo(req: Request, res: Response): Promise<void> {
     try {
-      console.log("👉 Incoming /event-profile-info request:", req.query);
-
       const creatorId = req.query.creatorId as string;
       if (!creatorId) {
         res.status(StatusCodes.BAD_REQUEST).json({ error: "creatorId is required" });
         return;
       }
-
       const profile = await this._eventProfileService.getProfileData(creatorId);
-      console.log("👉 Profile found:", profile);
-
       if (!profile) {
         res.status(StatusCodes.NOT_FOUND).json({ error: "Profile not found" });
         return;
       }
-
       res.json(profile);
     } catch (error) {
       console.error("❌ getProfileInfo error:", error);
