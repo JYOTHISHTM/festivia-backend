@@ -22,8 +22,6 @@ export interface IEvent extends Document {
     type: 'Point';
     coordinates: [number, number];
   };
-
-
 }
 
 const EventSchema: Schema = new Schema(
