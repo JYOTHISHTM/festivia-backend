@@ -26,7 +26,8 @@ class EventRepository implements IEventRepository {
 
   async getHomeEvents() {
     try {
-      return await EventModel.find({ isListed: true });
+      let today=new Date()
+      return await EventModel.find({ isListed: true,date:{$gte:today} });
     } catch (error) {
       throw new Error('Error fetching events from the database');
     }
