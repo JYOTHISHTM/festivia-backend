@@ -56,6 +56,8 @@ class EventService implements IEventService {
   }
 
   async getHomeEvents() {
+    console.log('hlo');
+    
     try {
       return await this._eventRepository.getHomeEvents();
     } catch (error) {
