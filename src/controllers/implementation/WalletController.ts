@@ -67,9 +67,6 @@ class WalletController implements IWalletController {
   }
 
 
-
-
-
   async addMoneyToCreator(req: Request, res: Response): Promise<Response> {
     try {
       const { creatorId, amount } = req.body;
