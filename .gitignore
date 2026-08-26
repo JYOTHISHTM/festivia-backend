@@ -5,3 +5,4 @@ logs/
 .env
 *.log
 "@ | Out-File -Encoding UTF8 .gitignore
+    

@@ -1,19 +1,46 @@
 import { ICreatorSubscription } from "../../models/CreatorSubscription";
+// import the correct subscription/history interfaces from your project
+
+interface ICreatorHistoryResponse {
+  subscriptions: ICreatorSubscription[];
+  total: number;
+}
+
+interface ISubscriptionHistoryResponse {
+  subscriptions: ICreatorSubscription[];
+  totalCount: number;
+}
 
 export interface ISubscriptionService {
-  createCheckoutSession(creatorId: string, name: string): Promise<string>;
 
-  buyUsingWallet(creatorId: string, planName: string):Promise<object>;
+  fetchCreatorSubscription(
+    creatorId: string
+  ): Promise<ICreatorSubscription | null>;
 
-  fetchCreatorSubscription(creatorId: string):Promise<object>;
+  createCheckoutSession(
+    creatorId: string,
+    name: string
+  ): Promise<string>;
+
+  buyUsingWallet(
+    creatorId: string,
+    planName: string
+  ): Promise<ICreatorSubscription>;
 
   getAllSubscriptionPlan(): Promise<ICreatorSubscription[] | null>;
 
-  getCreatorHistory(creatorId: string, page?: number, limit?: number):Promise<object>;
+  getCreatorHistory(
+    creatorId: string,
+    page: number,
+    limit: number
+  ): Promise<ICreatorHistoryResponse>;
 
-  getSubscriptionHistory(page?: number, limit?: number):Promise<object>;
+  getSubscriptionHistory(
+    page: number,
+    limit: number
+  ): Promise<ISubscriptionHistoryResponse>;
 
-  saveSubscription(data: any):Promise<object>;
-
-  expireSubscription(creatorId: string):Promise<object>;
+  expireSubscription(
+    creatorId: string
+  ): Promise<ICreatorSubscription | null | void>;
 }

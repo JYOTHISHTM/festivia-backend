@@ -5,6 +5,8 @@ import { PaymentUtil } from "../../utils/paymentUtil";
 import { EventMessages } from "../../enums/StatusCodes";
 import { ITicketRepository } from '../../repositories/interface/ITicketRepository';
 import { Types } from "mongoose";
+import { IUser } from '../../models/User';
+import { IEvent } from '../../models/Event';
 
 
 
@@ -16,17 +18,17 @@ class EventService implements IEventService {
     private _ticketRepository: ITicketRepository
   ) { }
 
-  async updateLocation(userId: string, location: string, latitude: number, longitude: number):Promise<object|null> {
+  async updateLocation(userId: string, location: string, latitude: number, longitude: number): Promise<IUser | null> {
     return await this._userRepository.updateUserLocation(userId, location, latitude, longitude);
   }
 
 
-  async getUser(userId: string):Promise<object|null> {
+  async getUser(userId: string): Promise<IUser | null> {
     return await this._userRepository.getUserById(userId);
   };
 
 
-  async fetchEventsForUserLocation(latitude: number, longitude: number):Promise<object|null> {
+  async fetchEventsForUserLocation(latitude: number, longitude: number): Promise<IEvent[]> {
     return await this._eventRepository.getEventsByLocation(latitude, longitude);
   }
 
@@ -74,7 +76,7 @@ class EventService implements IEventService {
   }
 
 
-  async getEventById(id: string):Promise<object|null> {
+  async getEventById(id: string): Promise<IEvent | null> {
     const event = await this._eventRepository.getEventById(id);
     return event;
   }

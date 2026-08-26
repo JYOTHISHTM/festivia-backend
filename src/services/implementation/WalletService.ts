@@ -99,7 +99,7 @@ class WalletService implements IWalletService {
     }
     return wallet;
   }
-  async createStripeSession(userId: string, amount: number): Promise<object> {
+  async createStripeSession(userId: string, amount: number): Promise<string | null> {
     if (!userId || !amount) {
       throw new Error(WalletMessages.USER_ID_AND_AMOUNT_REQUIRED);
     }
@@ -133,7 +133,7 @@ class WalletService implements IWalletService {
     return session.url;
   }
 
-  async createStripeSessionForCreator(creatorId: string, amount: number) {
+  async createStripeSessionForCreator(creatorId: string, amount: number): Promise<string | null> {
     if (!creatorId || !amount) {
       throw new Error(WalletMessages.CREATOR_ID_AND_AMOUNT_REQUIRED);
     }

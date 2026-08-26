@@ -1,6 +1,6 @@
 // services/StripeService.ts
 
-import { IStripeService } from '../interface/IStripeService';
+import { IStripeService, StripeMetadata } from '../interface/IStripeService';
 import { stripe } from '../../utils/stripe';
 
 export class StripeService implements IStripeService {
@@ -8,10 +8,10 @@ export class StripeService implements IStripeService {
     amount: number,
     successUrl: string,
     cancelUrl: string,
-    metadata: Record<string,null> = {},
+    metadata: StripeMetadata = {},
     productName: string = 'Wallet Top-up'
   ): Promise<string> {
-    const customer = await stripe.customers.create({ metadata });
+    const customer = await stripe.customers.create({ metadata: metadata as Record<string, string> });
 
     const session = await stripe.checkout.sessions.create({
       mode: 'payment',

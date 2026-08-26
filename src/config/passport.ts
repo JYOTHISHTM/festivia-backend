@@ -30,7 +30,7 @@ passport.use(
     },
     async (_token, _refreshToken, profile, done) => {
       try {
-        const user = await authService.findOrCreate(profile);
+        const user = await authService.findOrCreate(profile as any);
 
         if (!user) {
           return done(null, false);

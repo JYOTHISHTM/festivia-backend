@@ -1,4 +1,4 @@
-import { IAuthService } from "../interface/IAuthService";
+import { IAuthService, GoogleProfile, LoginResult } from "../interface/IAuthService";
 import { IUserRepository } from "../../repositories/interface/IUserRepository";
 import { ICreatorRepository } from "../../repositories/interface/ICreatorRepository";
 import { IAuthRepository } from "../../repositories/interface/IAuthRepository";
@@ -13,12 +13,6 @@ import { generateOTP } from "../../utils/otpGenerator";
 import { AuthStatus } from "../../enums/AuthStatus";
 import { OTP_EMAIL_TEMPLATE } from "../../utils/otpEmailTemplate";
 
-interface GoogleProfile {
-  id: string;
-  displayName: string;
-  emails: { value: string }[];
-}
-
 
 class AuthService implements IAuthService {
   constructor(
@@ -32,7 +26,7 @@ class AuthService implements IAuthService {
 
 
 
-  async login(email: string, password: string, role: Roles) {
+  async login(email: string, password: string, role: Roles): Promise<LoginResult> {
     const repository = role === Roles.USER ? this._userRepository : this._creatorRepository;
     const user = await repository.findByEmail(email);
 
@@ -45,22 +39,22 @@ class AuthService implements IAuthService {
 
     if (role === Roles.CREATOR && "status" in user) {
       if (user.status === AuthStatus.PENDING) {
-        return { status: AuthStatus.PENDING, message: AuthMessages.PENDING_APPROVAL, user: { id: user._id } };
+        return { status: AuthStatus.PENDING, message: AuthMessages.PENDING_APPROVAL, user: { id: String(user._id) } };
       }
       if (user.status === AuthStatus.REJECTED) {
-        return { status: AuthStatus.REJECTED, message: user.rejectionReason || AuthMessages.REJECTED_ACCOUNT, user: { id: user._id } };
+        return { status: AuthStatus.REJECTED, message: user.rejectionReason || AuthMessages.REJECTED_ACCOUNT, user: { id: String(user._id) } };
       }
     }
 
     const token = this._tokenService.generateAccessToken({ id: user._id });
     const refreshToken = this._tokenService.generateRefreshToken({ id: user._id });
-    await repository.updateRefreshToken(user._id, refreshToken);
+    await repository.updateRefreshToken(String(user._id), refreshToken);
 
     return {
       status: AuthStatus.APPROVED,
       token,
       refreshToken,
-      user: { id: user._id, email: user.email, name: user.name, status: "status" in user ? user.status : undefined }
+      user: { id: String(user._id), email: user.email, name: user.name, status: "status" in user ? user.status : undefined }
     };
   }
 
@@ -119,9 +113,10 @@ class AuthService implements IAuthService {
   async findOrCreate(profile: GoogleProfile): Promise<IUser | null> {
     let user = await this._authRepository.findByGoogleId(profile.id);
     if (!user) {
+      const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : "";
       user = await this._authRepository.createUser({
         googleId: profile.id,
-        email: profile.emails[0].value,
+        email,
         name: profile.displayName,
       });
     }

@@ -1,10 +1,11 @@
 import { EventGallery } from "../../models/EventGallery";
+import { IEventProfile } from "../../models/EventProfile";
 
 export interface IEventProfileService {
-  getAllPrivateCreatorsData(): Promise<object>
-  getAllPost(creatorId: string): Promise<object>
-  postEvent(data: EventGallery): Promise<object>
-  findByIdService(id: string): Promise<object>
-  updateProfile(field: string, value: String, creatorId: string): Promise<object>
-  getProfileData(creatorId: string): Promise<object>
+  getAllPrivateCreatorsData(): Promise<IEventProfile[]>;
+  getAllPost(creatorId: string): Promise<EventGallery[]>;
+  postEvent(data: EventGallery): Promise<EventGallery>;
+  findByIdService(id: string): Promise<EventGallery | null>;
+  updateProfile(field: string, value: any, creatorId: string): Promise<IEventProfile | null>;
+  getProfileData(creatorId: string): Promise<IEventProfile | null>;
 }

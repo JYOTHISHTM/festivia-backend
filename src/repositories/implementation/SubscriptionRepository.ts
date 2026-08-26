@@ -3,15 +3,17 @@ import mongoose from "mongoose";
 import { ICreatorSubscription } from '../../models/CreatorSubscription'
 import Subscription from "../../models/Subscription";
 import { Wallet } from '../../models/Wallet';
-import { ISubscriptionRepository } from "../interface/ISubscriptionRepository";
+import { ISubscriptionRepository, ICreateSubscriptionData } from "../interface/ISubscriptionRepository";
 
 
-interface SubscriptionData {
+export interface SubscriptionData {
   creatorId: string;
-  planName: string;
+  planId?: string;
+  planName?: string;
   startDate: Date;
   endDate: Date;
-  status: string;
+  status?: string;
+  [key: string]: any;
 }
 
 
@@ -33,7 +35,7 @@ class SubscriptionRepository implements ISubscriptionRepository {
     );
 
     wallet.balance -= plan.price;
-    wallet.transactions.push({ type: 'deduct', amount: plan.price });
+    wallet.transactions.push({ type: 'deduct', amount: plan.price, date: new Date() });
     await wallet.save();
 
     const startDate = new Date();
@@ -102,7 +104,7 @@ class SubscriptionRepository implements ISubscriptionRepository {
     return { subscriptions, totalCount };
   }
 
-  async createSubscription(data: SubscriptionData) {
+  async createSubscription(data: ICreateSubscriptionData) {
     return await CreatorSubscription.create(data);
   }
 

@@ -10,33 +10,69 @@ class AuthController implements IAuthController {
   constructor(private readonly _authService: IAuthService) { }
 
 
-  async login(req: Request, res: Response): Promise<Response> {
-    try {
-      const { email, password, role } = req.body;
-      const result = await this._authService.login(email, password, role);
+async login(req: Request, res: Response): Promise<Response> {
+  try {
+    const { email, password, role } = req.body;
 
-      if (!result || result.status === "error") {
-        return res.status(StatusCodes.UNAUTHORIZED).json({ error: result?.message || AuthMessages.INVALID_CREDENTIALS });
-      }
+    const result = await this._authService.login(email, password, role);
 
-      if (result.status === "pending" || result.status === "rejected") {
-        return res.status(StatusCodes.FORBIDDEN).json({ error: result.message, status: result.status, user: result.user });
-      }
-
-      const { token, refreshToken, user } = result;
-      res.cookie("refreshToken", refreshToken, { httpOnly: true, secure: true, sameSite: "strict" });
-
-      if (role === "creator") {
-        return res.json({ token, creator: { id: user.id, email: user.email, name: user.name, status: user.status }, status: result.status });
-      }
-
-      return res.json({ token, user: { id: user.id, email: user.email, name: user.name } });
-    } catch (err) {
-      const error = err as Error
-      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({ error: error.message || AuthMessages.INTERNAL_SERVER_ERROR });
+    if (!result || result.status === "error") {
+      return res.status(StatusCodes.UNAUTHORIZED).json({
+        error: result?.message || AuthMessages.INVALID_CREDENTIALS,
+      });
     }
-  }
 
+    if (result.status === "pending" || result.status === "rejected") {
+      return res.status(StatusCodes.FORBIDDEN).json({
+        error: result.message,
+        status: result.status,
+        user: result.user,
+      });
+    }
+
+    if (!result.user || !result.token || !result.refreshToken) {
+      return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+        error: AuthMessages.INTERNAL_SERVER_ERROR,
+      });
+    }
+
+    const { token, refreshToken, user } = result;
+
+    res.cookie("refreshToken", refreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "strict",
+    });
+
+    if (role === "creator") {
+      return res.json({
+        token,
+        creator: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          status: user.status,
+        },
+        status: result.status,
+      });
+    }
+
+    return res.json({
+      token,
+      user: {
+        id: user.id,
+        email: user.email,
+        name: user.name,
+      },
+    });
+  } catch (err) {
+    const error = err as Error;
+
+    return res.status(StatusCodes.INTERNAL_SERVER_ERROR).json({
+      error: error.message || AuthMessages.INTERNAL_SERVER_ERROR,
+    });
+  }
+}
   async signUp(req: Request, res: Response): Promise<Response> {
     try {
       const { name, email, password, role } = req.body;

@@ -4,7 +4,6 @@ import { StatusCodes } from "../../enums/StatusCodes";
 import { AuthMessages } from "../../enums/StatusCodes";
 import { IOtpService } from "../../services/interface/IOtpService";
 import { Roles } from "../../enums/Roles";
-import { AxiosError } from "axios";
 
 class OtpController implements IOtpController {
   constructor(private _otpService: IOtpService) { }
@@ -93,11 +92,11 @@ async verifyOTP(req: Request, res: Response): Promise<void> {
       data: result 
     });
   } catch (err) {
-      const error = err as AxiosError<{ message: string }>;
+    const error = err as Error;
 
     console.error("Error message:", error.message);
     
-    const errorMessage = (error as Error).message;
+    const errorMessage = error.message;
     
     res.status(StatusCodes.BAD_REQUEST).json({ 
       success: false, 

@@ -2,9 +2,11 @@ import { ICreatorSubscription } from "../../models/CreatorSubscription";
 
 export interface ICreateSubscriptionData {
   creatorId: string;
-  planId: string;
+  planId?: string;
+  planName?: string;
   startDate: Date;
   endDate: Date;
+  status?: string;
   [key: string]: unknown; // optional extra fields
 }
 

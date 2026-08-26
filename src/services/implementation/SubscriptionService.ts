@@ -1,18 +1,10 @@
 import { ICreatorSubscription } from '../../models/CreatorSubscription';
 import Subscription from '../../models/Subscription';
 import { ISubscriptionService } from '../interface/ISubscriptionService';
-import { ISubscriptionRepository } from '../../repositories/interface/ISubscriptionRepository';
+import { ISubscriptionRepository, ICreateSubscriptionData } from '../../repositories/interface/ISubscriptionRepository';
 import { SubscriptionMessages } from '../../enums/StatusCodes';
 import { IStripeService } from '../interface/IStripeService';
 
-
-interface SubscriptionData {
-  creatorId: string;
-  planName: string;
-  startDate: Date;
-  endDate: Date;
-  status: string;
-}
 
 class SubscriptionService implements ISubscriptionService {
 
@@ -65,7 +57,7 @@ class SubscriptionService implements ISubscriptionService {
     return await this._subscriptionRepository.getSubscriptionsForAdmin(page, limit);
   }
 
-  async saveSubscription(data: SubscriptionData) {
+  async saveSubscription(data: ICreateSubscriptionData) {
     return await this._subscriptionRepository.createSubscription(data);
   }
 

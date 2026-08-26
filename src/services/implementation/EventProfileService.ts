@@ -1,5 +1,6 @@
 import { IEventProfileService } from "../interface/IEventProfileService";
 import { EventGallery } from "../../models/EventGallery";
+import { IEventProfile } from "../../models/EventProfile";
 import { IEventProfileRepository } from "../../repositories/interface/IEventProfileRepository";
 
  class EventProfileService implements IEventProfileService {
@@ -7,29 +8,29 @@ import { IEventProfileRepository } from "../../repositories/interface/IEventProf
   constructor(private _eventProfileRepository: IEventProfileRepository) { }
 
 
-  async getAllPrivateCreatorsData(): Promise<object>{
+  async getAllPrivateCreatorsData(): Promise<IEventProfile[]>{
     return this._eventProfileRepository.getAllPrivateCreatorsProfile();
   }
 
   
 
-  async getAllPost(creatorId: string): Promise<object>{
+  async getAllPost(creatorId: string): Promise<EventGallery[]>{
     return this._eventProfileRepository.getAllPost(creatorId);
   }
 
-  async postEvent(data: EventGallery): Promise<object>{
+  async postEvent(data: EventGallery): Promise<EventGallery>{
     return this._eventProfileRepository.create(data);
   }
 
-  async findByIdService(id: string): Promise<object>{
+  async findByIdService(id: string): Promise<EventGallery | null>{
     return this._eventProfileRepository.findById(id);
   }
 
-  async updateProfile(field: string, value: any, creatorId: string): Promise<object>{
+  async updateProfile(field: string, value: any, creatorId: string): Promise<IEventProfile | null>{
     return this._eventProfileRepository.updateProfileField(field, value, creatorId);
   }
 
-  async getProfileData(creatorId: string): Promise<object>{
+  async getProfileData(creatorId: string): Promise<IEventProfile | null>{
     return this._eventProfileRepository.getProfile(creatorId);
   }
 }
