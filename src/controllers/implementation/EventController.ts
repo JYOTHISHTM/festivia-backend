@@ -12,6 +12,7 @@ class EventController implements IEventController {
   constructor(private readonly _eventService: IEventService) { }
 
   async getHomeEvents(req: Request, res: Response): Promise<void> {
+    console.log('reached controller');
     try {
       const events = await this._eventService.getHomeEvents();
       const mappedEvents = Array.isArray(events) ? events.map(homeEventDTO) : [];
@@ -23,6 +24,8 @@ class EventController implements IEventController {
 
 
   async getAllListedEvents(req: Request, res: Response): Promise<void> {
+    console.log('reched');
+    
     try {
       const { creatorId } = req.params;
       const page = parseInt(req.query.page as string) || 1;
@@ -162,6 +165,8 @@ const userId = (req.user as { id: string }).id;
 
 
   async getEventsNearUser(req: Request, res: Response) {
+    console.log('reached');
+    
 const userId = (req.user as { id: string }).id;
     const user = await this._eventService.getUser(userId as string);
 
