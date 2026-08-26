@@ -76,7 +76,4 @@ class AdminController implements IAdminController {
   }
 }
 
-
-
-
 export default AdminController;
