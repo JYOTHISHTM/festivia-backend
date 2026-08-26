@@ -18,7 +18,7 @@ const EventGallerySchema: Schema = new Schema({
   date: { type: String, required: true },
   eventType: { type: String, required: true },
   category: { type: String, enum: ["Public", "Private"], required: true },
-  subCategory: { type: String, enum: ["Reserved", "General"], required: false },
+  subCategory: { type: String, enum: ["Reserved", "General", ""], required: false },
   totalTicketsSold: { type: Number, required: false },
   totalRevenue: { type: Number, required: false },
   mainImage: { type: String, required: true },
