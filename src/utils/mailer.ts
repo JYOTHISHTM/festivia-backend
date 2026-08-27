@@ -6,25 +6,38 @@ dotenv.config();
 
 export const sendMail = async (to: string, subject: string, html: string) => {
   try {
+    const user = process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : "";
+    const pass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : "";
+
+    if (!user || !pass) {
+      console.error("EMAIL_USER or EMAIL_PASS environment variables are missing!");
+    }
+
     const transporter = nodemailer.createTransport({
-      service: "Gmail",
+      host: "smtp.gmail.com",
+      port: 465,
+      secure: true,
       auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASS,
+        user,
+        pass,
       },
       tls: {
-    rejectUnauthorized: false, 
-  },
+        rejectUnauthorized: false,
+      },
     });
+
     const mailOptions = {
-      from: `"FESTIVIA" <${process.env.EMAIL_USER}>`,
+      from: `"FESTIVIA" <${user}>`,
       to,
       subject,
       html,
     };
 
     const info = await transporter.sendMail(mailOptions);
+    console.log("Email sent successfully to:", to, "MessageId:", info.messageId);
+    return info;
   } catch (error) {
+    console.error("Error in sendMail function:", error);
     throw new Error("Failed to send email");
   }
 };
