@@ -6,12 +6,39 @@ dotenv.config();
 
 export const sendMail = async (to: string, subject: string, html: string) => {
   try {
+    const resendApiKey = process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.trim() : "";
+
+    // 1. Primary Cloud Provider: Resend HTTP API (Port 443 - Never blocked on Render/Vercel)
+    if (resendApiKey) {
+      const response = await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${resendApiKey}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          from: "FESTIVIA <onboarding@resend.dev>",
+          to: [to],
+          subject,
+          html,
+        }),
+      });
+
+      const data: any = await response.json();
+      if (!response.ok) {
+        throw new Error(`Resend API Error: ${data.message || JSON.stringify(data)}`);
+      }
+      console.log("Email sent successfully via Resend API to:", to, "ID:", data.id);
+      return data;
+    }
+
+    // 2. Fallback: Nodemailer SMTP (For local dev or direct SMTP)
     const user = process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : "";
     const pass = process.env.EMAIL_PASS ? process.env.EMAIL_PASS.trim() : "";
 
     if (!user || !pass) {
       console.error("EMAIL_USER or EMAIL_PASS environment variables are missing!");
-      throw new Error("Server email configuration is missing (EMAIL_USER or EMAIL_PASS)");
+      throw new Error("Server email configuration is missing (EMAIL_USER/EMAIL_PASS or RESEND_API_KEY)");
     }
 
     const transporter = nodemailer.createTransport({
