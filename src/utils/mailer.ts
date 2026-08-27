@@ -11,6 +11,7 @@ export const sendMail = async (to: string, subject: string, html: string) => {
 
     if (!user || !pass) {
       console.error("EMAIL_USER or EMAIL_PASS environment variables are missing!");
+      throw new Error("Server email configuration is missing (EMAIL_USER or EMAIL_PASS)");
     }
 
     const transporter = nodemailer.createTransport({
@@ -24,7 +25,11 @@ export const sendMail = async (to: string, subject: string, html: string) => {
       tls: {
         rejectUnauthorized: false,
       },
-    });
+      family: 4,
+      connectionTimeout: 10000,
+      greetingTimeout: 5000,
+      socketTimeout: 10000,
+    } as any);
 
     const mailOptions = {
       from: `"FESTIVIA" <${user}>`,
@@ -36,9 +41,10 @@ export const sendMail = async (to: string, subject: string, html: string) => {
     const info = await transporter.sendMail(mailOptions);
     console.log("Email sent successfully to:", to, "MessageId:", info.messageId);
     return info;
-  } catch (error) {
+  } catch (error: any) {
+    const errorDetails = error?.message || String(error);
     console.error("Error in sendMail function:", error);
-    throw new Error("Failed to send email");
+    throw new Error(`Failed to send email: ${errorDetails}`);
   }
 };
 
