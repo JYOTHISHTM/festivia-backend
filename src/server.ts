@@ -30,7 +30,25 @@ app.use(passport.initialize());
 
 app.use(helmet());
 
-app.use(cors({ origin: config.frontendUrl, credentials: true }));
+const allowedOrigins = [
+  config.frontendUrl,
+  "https://festivia-event-management.vercel.app",
+  "http://localhost:5173",
+  "http://localhost:3000",
+].filter(Boolean) as string[];
+
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin || allowedOrigins.includes(origin) || allowedOrigins.includes(origin.replace(/\/$/, ""))) {
+        callback(null, true);
+      } else {
+        callback(null, true);
+      }
+    },
+    credentials: true,
+  })
+);
 
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

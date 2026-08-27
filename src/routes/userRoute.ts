@@ -94,47 +94,120 @@ router.get(
 
 router.get(
   "/google/callback",
-  passport.authenticate("google", { session: false, failureRedirect: "/login/failed" }),
-  (req, res) => {
-    const user: any = req.user;
+  passport.authenticate("google", { session: false, failureRedirect: `${process.env.FRONTEND_URL || "https://festivia-event-management.vercel.app"}/user/login?error=oauth_failed` }),
+  async (req, res) => {
+    try {
+      const user: any = req.user;
 
-    if (!user || !user._id) {
-      return res.redirect(`${process.env.FRONTEND_URL}/login/failed`);
+      if (!user || !user._id) {
+        return res.redirect(`${process.env.FRONTEND_URL || "https://festivia-event-management.vercel.app"}/user/login?error=oauth_failed`);
+      }
+
+      if (user.isBlocked) {
+        return res.redirect(`${process.env.FRONTEND_URL || "https://festivia-event-management.vercel.app"}/user/login?error=blocked`);
+      }
+
+      const jwtSecret = process.env.JWT_SECRET!;
+      const refreshSecret = process.env.JWT_REFRESH_SECRET!;
+
+      const token = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" });
+      const refreshToken = jwt.sign({ id: user._id }, refreshSecret, { expiresIn: "15d" });
+
+      await User.findByIdAndUpdate(user._id, { refreshToken });
+
+      res.cookie("refreshToken", refreshToken, {
+        httpOnly: true,
+        secure: true,
+        sameSite: "none",
+        maxAge: 15 * 24 * 60 * 60 * 1000,
+      });
+
+      const frontendUrl = process.env.FRONTEND_URL || "https://festivia-event-management.vercel.app";
+      res.redirect(`${frontendUrl}/user/oauth-success?token=${token}`);
+    } catch (err) {
+      console.error("Google callback error:", err);
+      const frontendUrl = process.env.FRONTEND_URL || "https://festivia-event-management.vercel.app";
+      res.redirect(`${frontendUrl}/user/login?error=oauth_failed`);
     }
-
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET!, { expiresIn: "1h" });
-    const refreshToken = jwt.sign({ id: user._id }, process.env.JWT_REFRESH_SECRET!, { expiresIn: "15d" });
-
-    res.cookie("refreshToken", refreshToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 15 * 24 * 60 * 60 * 1000,
-    });
-
-    res.redirect(`${process.env.FRONTEND_URL}/user/oauth-success`);
-  })
-
-
+  }
+);
 
 router.get("/oauth-user", async (req, res) => {
   try {
-    const refreshToken = req.cookies.refreshToken;
-    if (!refreshToken) return res.status(401).json({ message: "No refresh token found" });
+    let userId: string | null = null;
 
-    const refreshSecret = process.env.JWT_REFRESH_SECRET;
-    if (!refreshSecret) return res.status(500).json({ message: "JWT refresh secret not configured" });
+    const authHeader = req.headers.authorization;
+    const tokenFromHeaderOrQuery = (authHeader && authHeader.startsWith("Bearer "))
+      ? authHeader.split(" ")[1]
+      : (req.query.token as string);
 
-    const decoded = jwt.verify(refreshToken, refreshSecret) as { id: string };
+    if (tokenFromHeaderOrQuery) {
+      const jwtSecret = process.env.JWT_SECRET;
+      if (jwtSecret) {
+        try {
+          const decoded = jwt.verify(tokenFromHeaderOrQuery, jwtSecret) as { id: string };
+          userId = decoded.id;
+        } catch (e) {
+          console.warn("OAuth token verification failed from query/header:", e);
+        }
+      }
+    }
 
-    const user = await User.findById(decoded.id);
+    if (!userId) {
+      const refreshToken = req.cookies?.refreshToken;
+      if (refreshToken) {
+        const refreshSecret = process.env.JWT_REFRESH_SECRET;
+        if (refreshSecret) {
+          try {
+            const decoded = jwt.verify(refreshToken, refreshSecret) as { id: string };
+            userId = decoded.id;
+          } catch (e) {
+            console.warn("OAuth refresh token verification failed from cookie:", e);
+          }
+        }
+      }
+    }
+
+    if (!userId) {
+      return res.status(401).json({ message: "No refresh token or access token found" });
+    }
+
+    const user = await User.findById(userId);
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const jwtSecret = process.env.JWT_SECRET;
-    if (!jwtSecret) return res.status(500).json({ message: "JWT secret not configured" });
+    if (user.isBlocked) {
+      return res.status(403).json({ message: "Account is blocked" });
+    }
+
+    const jwtSecret = process.env.JWT_SECRET!;
+    const refreshSecret = process.env.JWT_REFRESH_SECRET!;
 
     const newAccessToken = jwt.sign({ id: user._id }, jwtSecret, { expiresIn: "1h" });
+    const newRefreshToken = jwt.sign({ id: user._id }, refreshSecret, { expiresIn: "15d" });
 
-    res.json({ user, token: newAccessToken });
+    await User.findByIdAndUpdate(user._id, { refreshToken: newRefreshToken });
+
+    res.cookie("refreshToken", newRefreshToken, {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+      maxAge: 15 * 24 * 60 * 60 * 1000,
+    });
+
+    return res.json({
+      user: {
+        _id: user._id,
+        id: user._id,
+        name: user.name,
+        email: user.email,
+        wallet: user.wallet,
+        location: user.location,
+        isVerified: user.isVerified,
+        isBlocked: user.isBlocked,
+        googleId: user.googleId,
+      },
+      token: newAccessToken,
+    });
   } catch (error) {
     console.error("OAuth user fetch error:", error);
     return res.status(401).json({ message: "Invalid or expired refresh token" });

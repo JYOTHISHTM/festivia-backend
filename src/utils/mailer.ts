@@ -6,9 +6,36 @@ dotenv.config();
 
 export const sendMail = async (to: string, subject: string, html: string) => {
   try {
+    const brevoApiKey = process.env.BREVO_API_KEY ? process.env.BREVO_API_KEY.trim() : "";
     const resendApiKey = process.env.RESEND_API_KEY ? process.env.RESEND_API_KEY.trim() : "";
+    const senderEmail = process.env.EMAIL_USER ? process.env.EMAIL_USER.trim() : "jothishjo2023@gmail.com";
 
-    // 1. Primary Cloud Provider: Resend HTTP API (Port 443 - Never blocked on Render/Vercel)
+    // 1. Brevo HTTP API (Port 443 - 300 free emails/day to ANY recipient, no domain required)
+    if (brevoApiKey) {
+      const response = await fetch("https://api.brevo.com/v3/smtp/email", {
+        method: "POST",
+        headers: {
+          "api-key": brevoApiKey,
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({
+          sender: { name: "FESTIVIA", email: senderEmail },
+          to: [{ email: to }],
+          subject,
+          htmlContent: html,
+        }),
+      });
+
+      const data: any = await response.json();
+      if (!response.ok) {
+        throw new Error(`Brevo API Error: ${data.message || JSON.stringify(data)}`);
+      }
+      console.log("Email sent successfully via Brevo API to:", to, "ID:", data.messageId);
+      return data;
+    }
+
+    // 2. Resend HTTP API (Port 443 - Restricted to account owner email unless domain is verified)
     if (resendApiKey) {
       const response = await fetch("https://api.resend.com/emails", {
         method: "POST",

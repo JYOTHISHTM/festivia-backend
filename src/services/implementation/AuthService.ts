@@ -114,11 +114,24 @@ class AuthService implements IAuthService {
     let user = await this._authRepository.findByGoogleId(profile.id);
     if (!user) {
       const email = profile.emails && profile.emails.length > 0 ? profile.emails[0].value : "";
-      user = await this._authRepository.createUser({
-        googleId: profile.id,
-        email,
-        name: profile.displayName,
-      });
+      if (email) {
+        user = await this._userRepository.findByEmail(email);
+        if (user) {
+          user.googleId = profile.id;
+          if (!user.isVerified) {
+            user.isVerified = true;
+          }
+          await user.save();
+        }
+      }
+      if (!user) {
+        user = await this._authRepository.createUser({
+          googleId: profile.id,
+          email,
+          name: profile.displayName || "Google User",
+          isVerified: true,
+        });
+      }
     }
     return user;
   }
